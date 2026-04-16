@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SmartCampus WVSU-JC | SDG 9: Industry, Innovation & Infrastructure</title>
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary-dark: #0B3B5F;
+            --primary: #1B7B6E;
+            --primary-light: #e6f4f1;
+            --accent: #f59e0b;
+            --accent-dark: #c2410c;
+            --sdg9-color: #f59e0b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+            --success: #2c9e6e;
+            --warning: #f5a623;
+            --danger: #e05a5a;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-xl: 1.5rem;
+            --radius-lg: 1rem;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--gray-900);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.88);
+            z-index: -1;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        /* Header & SDG9 Badge */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            border: 1px solid var(--gray-200);
+            backdrop-filter: blur(2px);
+        }
+        .title h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .title p {
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+        .sdg-card {
+            background: #fffbeb;
+            border-left: 4px solid var(--accent);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            cursor: help;
+            position: relative;
+        }
+        .sdg-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sdg-card p {
+            font-size: 0.75rem;
+            color: #7c2d12;
+        }
+        .sdg-tooltip {
+            visibility: hidden;
+            width: 260px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -130px;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sdg-card:hover .sdg-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Campus Info */
+        .campus-info {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(4px);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .campus-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .campus-detail-item {
+            font-size: 0.85rem;
+            color: var(--gray-700);
+        }
+        .campus-detail-item strong {
+            color: var(--primary-dark);
+        }
+        /* Auth */
+        .auth-container {
+            background: rgba(255,255,255,0.96);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            max-width: 500px;
+            margin: 2rem auto;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+        }
+        .auth-container input, .auth-container button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+        .auth-container button {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-switch {
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .auth-switch a {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        /* Main App */
+        .main-app {
+            display: none;
+        }
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+        /* Staff Panel */
+        .staff-panel, .admin-panel {
+            background: rgba(255,255,255,0.96);
+            border: 1px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .staff-controls, .admin-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+        .serve-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            border: 1px solid var(--gray-200);
+        }
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--gray-700);
+        }
+        .kpi-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: white;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem 0 1.5rem;
+        }
+        .card-header h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .sdg9-icon {
+            font-size: 0.7rem;
+            background: var(--sdg9-color);
+            color: white;
+            border-radius: 20px;
+            padding: 0.2rem 0.6rem;
+        }
+        .card-header p {
+            font-size: 0.8rem;
+            color: var(--gray-700);
+            margin-top: 0.25rem;
+            border-left: 3px solid var(--accent);
+            padding-left: 0.75rem;
+        }
+        .card-body {
+            padding: 1.25rem 1.5rem 1.5rem;
+        }
+        /* Queue items */
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .office-name { font-weight: 600; min-width: 160px; }
+        .queue-stats { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+        .badge-count { background: var(--gray-100); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 600; }
+        .badge-wait { background: #eef6ef; color: var(--success); padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.8rem; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.75rem; cursor: pointer; }
+        /* Space items */
+        .space-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .space-name { width: 150px; font-weight: 500; }
+        .progress-bar { flex: 1; height: 8px; background: var(--gray-200); border-radius: 1rem; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; transition: width 0.2s; }
+        .fill-low { background: var(--success); }
+        .fill-mid { background: var(--warning); }
+        .fill-high { background: var(--danger); }
+        .occupancy-text { font-size: 0.8rem; font-weight: 600; min-width: 70px; text-align: right; }
+        .checkin-btn, .checkout-btn, .waitlist-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+        .checkout-btn { background: var(--danger); }
+        .waitlist-btn { background: #6c5ce7; }
+        .history-item {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: 0.6rem 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .qr-container { text-align: center; margin-top: 1rem; }
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--gray-900);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            z-index: 1000;
+            animation: fadeInUp 0.2s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.75rem;
+            color: var(--gray-700);
+            background: rgba(255,255,255,0.8);
+            border-radius: var(--radius-lg);
+        }
+        .sdg9-highlight {
+            border-left: 4px solid var(--sdg9-color);
+            padding-left: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .export-btn {
+            background: var(--primary-dark);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">
+            <h1>🏭 SmartCampus WVSU-JC</h1>
+            <p>Resilient Digital Infrastructure · Real‑time · SDG 9</p>
+        </div>
+        <div class="sdg-card">
+            <h3>📌 SDG No. 9</h3>
+            <p>Industry, Innovation & Infrastructure</p>
+            <div class="sdg-tooltip">
+                🎯 Target 9.1: Develop quality, reliable, sustainable and resilient infrastructure.<br>
+                This app delivers digital queue & space management – a resilient campus infrastructure.
+            </div>
+        </div>
+    </div>
+
+    <!-- Real WVSU Janiuay Campus Information -->
+    <div class="campus-info">
+        <div class="campus-details">
+            <div class="campus-detail-item"><strong>🏛️ West Visayas State University - Janiuay Campus</strong></div>
+            <div class="campus-detail-item"><strong>📍 Address:</strong> Cabeza Jose Brana Street, Janiuay, Iloilo, Philippines 5034</div>
+            <div class="campus-detail-item"><strong>📅 Established:</strong> 1946 as Janiuay High School | Integrated into WVSU: August 22, 2000</div>
+            <div class="campus-detail-item"><strong>👥 Student Population:</strong> ~1,575</div>
+            <div class="campus-detail-item"><strong>🏞️ Land Area:</strong> 7.92 hectares</div>
+            <div class="campus-detail-item"><strong>📞 Contact:</strong> (033) 317-11-21 | 📧 janiuay@wvsu.edu.ph</div>
+        </div>
+    </div>
+
+    <!-- Login / Registration -->
+    <div id="authContainer" class="auth-container">
+        <h2 id="authTitle">Login to SmartCampus</h2>
+        <input type="text" id="loginUsername" placeholder="Username">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button id="loginBtn">Login</button>
+        <div class="auth-switch">
+            Don't have an account? <a id="showRegisterLink">Register here</a>
+        </div>
+        <div class="sdg9-highlight" style="margin-top:1rem; font-size:0.7rem;">
+            🔧 SDG 9: Innovation in campus infrastructure starts with digital identity.
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="main-app">
+        <div class="user-bar">
+            <span>👋 Logged in as: <strong id="currentUsername"></strong> (<span id="userRole"></span>)</span>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </div>
+
+        <!-- Staff Panel (for staff users) -->
+        <div id="staffPanel" class="staff-panel">
+            <h3>👨‍💼 Staff Service Panel – SDG 9 Resilient Operations</h3>
+            <div class="staff-controls">
+                <select id="staffOfficeSelect"></select>
+                <button id="serveNextBtn" class="serve-btn">✅ Serve Next Customer</button>
+                <span style="font-size:0.8rem;">Reduces queue by 1 and calls next ticket.</span>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel">
+            <h3>🛠️ Infrastructure Management (Admin) – SDG 9</h3>
+            <p>Resilient infrastructure requires adaptive controls. Use these tools to manage queues, resources, and view analytics.</p>
+            <div class="admin-controls">
+                <input type="text" id="newOfficeName" placeholder="New office name">
+                <input type="text" id="newOfficePrefix" placeholder="Prefix (e.g., REG)">
+                <button id="addOfficeBtn">Add Office</button>
+                <button id="resetSystemBtn" style="background:#e05a5a;">Reset System</button>
+            </div>
+            <div id="adminQueueControls"></div>
+            <div class="chart-container">
+                <canvas id="queueChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- KPI Dashboard -->
+        <div class="kpi-grid">
+            <div class="kpi-card"><div class="kpi-label">📊 ACTIVE SERVICE POINTS</div><div class="kpi-value" id="activeQueuesCount">-</div><div class="sdg9-highlight" style="font-size:0.6rem;">Infrastructure reach</div></div>
+            <div class="kpi-card"><div class="kpi-label">🏢 AVAILABLE SPACES</div><div class="kpi-value" id="availableSpacesCount">-</div><div class="sdg9-highlight" style="font-size:0.6rem;">Resource efficiency</div></div>
+            <div class="kpi-card"><div class="kpi-label">⏱️ AVG. WAIT TIME</div><div class="kpi-value" id="avgWaitValue">-<span class="kpi-unit">min</span></div><div class="sdg9-highlight" style="font-size:0.6rem;">Process innovation</div></div>
+            <div class="kpi-card"><div class="kpi-label">🎫 TOTAL DIGITAL TICKETS</div><div class="kpi-value" id="totalTicketsValue">-</div><div class="sdg9-highlight" style="font-size:0.6rem;">Paperless & scalable</div></div>
+        </div>
+
+        <!-- Main Queues & Spaces -->
+        <div class="two-col">
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 Queue Management <span class="sdg9-icon">SDG 9</span></h2>
+                    <p>Real‑time digital ticketing · push/pop operations · transparent infrastructure</p>
+                </div>
+                <div class="card-body" id="queueList">Loading...</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2>📊 Space Utilization & Waiting List <span class="sdg9-icon">SDG 9</span></h2>
+                    <p>Check‑in/out · Join waiting list when full · real‑time occupancy</p>
+                </div>
+                <div class="card-body" id="spaceList">Loading...</div>
+            </div>
+        </div>
+
+        <!-- My Activity & Notifications + History with Export -->
+        <div class="two-col">
+            <div class="card">
+                <div class="card-header">
+                    <h2>🎫 My Activity <span class="sdg9-icon">SDG 9</span></h2>
+                    <p>Active ticket (push/pop) + QR code for digital validation</p>
+                </div>
+                <div class="card-body" id="activityPanel">No active ticket.</div>
+                <div id="qrCodeContainer" class="qr-container"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h2>📜 My History <span class="sdg9-icon">SDG 9</span></h2>
+                    <p>Track completed & cancelled tickets, space usage</p>
+                    <button id="exportHistoryBtn" class="btn-primary export-btn" style="background:var(--primary-dark); margin-top:0.5rem;">📎 Export History (CSV)</button>
+                </div>
+                <div class="card-body" id="historyPanel">Loading...</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h2>🔔 Smart Notifications <span class="sdg9-icon">SDG 9</span></h2>
+                <p>Real‑time alerts – resilient communication infrastructure</p>
+            </div>
+            <div class="card-body" id="notificationsPanel">✅ System ready</div>
+        </div>
+    </div>
+
+    <footer>
+        🌍 West Visayas State University - Janiuay Campus — Explicitly aligned with <strong>SDG 9: Industry, Innovation and Infrastructure</strong>.<br>
+        Target 9.1: Develop quality, reliable, sustainable and resilient infrastructure to support economic development and human well‑being.<br>
+        This digital platform modernizes campus queues and space utilization – a model of innovative, resilient infrastructure for education.
+    </footer>
+</div>
+
+<script>
+    // ---------- STORAGE KEYS ----------
+    const USERS_STORAGE = 'smartcampus_wvsu_users_v2';
+    const SESSION_KEY = 'smartcampus_wvsu_session_v2';
+    const CAMPUS_STORAGE = 'smartcampus_wvsu_data_v2';
+
+    // Real campus state based on WVSU Janiuay (with waiting lists)
+    let campusState = {
+        offices: [
+            { id: 'registrar', name: "📋 Registrar's Office", queueCount: 12, avgWaitMin: 18, ticketPrefix: "REG", location: "Registrar's Building" },
+            { id: 'cashier', name: "💰 Cashier's Office", queueCount: 8, avgWaitMin: 12, ticketPrefix: "CSH", location: "Administration Building" },
+            { id: 'library', name: "📚 WVSU Janiuay Library", queueCount: 5, avgWaitMin: 6, ticketPrefix: "LIB", location: "Main Library" },
+            { id: 'it', name: "💻 ICT Office", queueCount: 3, avgWaitMin: 4, ticketPrefix: "IT", location: "ICT Building" },
+            { id: 'alumni', name: "🤝 Alumni Affairs Office", queueCount: 2, avgWaitMin: 3, ticketPrefix: "ALM", location: "Admin Building" },
+            { id: 'guidance', name: "🧭 Guidance and Counseling", queueCount: 1, avgWaitMin: 2, ticketPrefix: "GUID", location: "Student Services Building" },
+            { id: 'hospitality', name: "🍽️ Hospitality Management Office", queueCount: 0, avgWaitMin: 1, ticketPrefix: "HM", location: "Hospitality Building" }
+        ],
+        spaces: [
+            { id: 'libMain', name: "📚 Main Library", capacity: 120, occupied: 45, description: "Quiet study area", waitingList: [] },
+            { id: 'compLab1', name: "💻 Computer Lab 1", capacity: 35, occupied: 28, description: "ICT Building", waitingList: [] },
+            { id: 'compLab2', name: "💻 Computer Lab 2", capacity: 30, occupied: 15, description: "Open Access Lab", waitingList: [] },
+            { id: 'innovationHub', name: "🚀 Innovation Hub", capacity: 25, occupied: 22, description: "Research space", waitingList: [] },
+            { id: 'studyRoomA', name: "📖 Study Room A", capacity: 12, occupied: 8, description: "Group study", waitingList: [] },
+            { id: 'studyRoomB', name: "📖 Study Room B", capacity: 10, occupied: 4, description: "Quiet study", waitingList: [] },
+            { id: 'audioVisual', name: "🎬 Audio-Visual Room", capacity: 50, occupied: 12, description: "Presentations", waitingList: [] },
+            { id: 'gymnasium', name: "🏀 WVSU-JC Gymnasium", capacity: 200, occupied: 35, description: "Sports venue", waitingList: [] }
+        ],
+        totalCampusTickets: 1575
+    };
+
+    // Load/Save Campus
+    function loadCampusState() {
+        const stored = localStorage.getItem(CAMPUS_STORAGE);
+        if (stored) { try { campusState = JSON.parse(stored); } catch(e) {} }
+        // ensure waitingList exists for each space
+        campusState.spaces.forEach(space => { if (!space.waitingList) space.waitingList = []; });
+    }
+    function saveCampusState() { localStorage.setItem(CAMPUS_STORAGE, JSON.stringify(campusState)); triggerStorageEvent(); }
+    function triggerStorageEvent() {
+        // Notify other tabs/windows
+        window.dispatchEvent(new StorageEvent('storage', { key: CAMPUS_STORAGE, newValue: JSON.stringify(campusState) }));
+    }
+    loadCampusState();
+
+    // User management
+    function getUsers() {
+        const stored = localStorage.getItem(USERS_STORAGE);
+        if (stored) return JSON.parse(stored);
+        return {
+            "student1": { password: "pass123", role: "student", activeTicket: null, notifications: [], history: [], totalTicketsIssued: 0 },
+            "staff1": { password: "staff123", role: "staff", activeTicket: null, notifications: [], history: [], totalTicketsIssued: 0 },
+            "admin": { password: "admin123", role: "admin", activeTicket: null, notifications: [], history: [], totalTicketsIssued: 0, isAdmin: true }
+        };
+    }
+    function saveUsers(users) { localStorage.setItem(USERS_STORAGE, JSON.stringify(users)); triggerStorageEvent(); }
+    function getLoggedInUser() { return localStorage.getItem(SESSION_KEY); }
+    function setLoggedInUser(username) { if (username) localStorage.setItem(SESSION_KEY, username); else localStorage.removeItem(SESSION_KEY); triggerStorageEvent(); }
+
+    // Helper: add notification
+    function addUserNotification(username, message) {
+        const users = getUsers();
+        if (users[username]) {
+            if (!users[username].notifications) users[username].notifications = [];
+            users[username].notifications.unshift(message + " · " + new Date().toLocaleTimeString());
+            if (users[username].notifications.length > 10) users[username].notifications.pop();
+            saveUsers(users);
+        }
+    }
+    function addToHistory(username, entry) {
+        const users = getUsers();
+        if (users[username]) {
+            if (!users[username].history) users[username].history = [];
+            users[username].history.unshift({ ...entry, timestamp: new Date().toLocaleString() });
+            if (users[username].history.length > 20) users[username].history.pop();
+            saveUsers(users);
+        }
+    }
+
+    // PUSH: Issue ticket
+    function issueTicket(officeId) {
+        const username = getLoggedInUser();
+        if (!username) { showToast("Please login first"); return; }
+        const users = getUsers();
+        if (users[username]?.role !== 'student' && users[username]?.role !== 'admin') { showToast("Only students can get tickets."); return; }
+        const office = campusState.offices.find(o => o.id === officeId);
+        if (!office) return;
+        office.queueCount += 1;
+        office.avgWaitMin = Math.min(45, office.avgWaitMin + 1.5);
+        campusState.totalCampusTickets += 1;
+        saveCampusState();
+        const ticketNumber = `${office.ticketPrefix}-${Math.floor(Math.random() * 900 + 100)}`;
+        const newTicket = { ticketId: ticketNumber, officeId: office.id, officeName: office.name, position: office.queueCount, waitEstimate: Math.round(office.avgWaitMin), timestamp: Date.now() };
+        users[username].activeTicket = newTicket;
+        users[username].totalTicketsIssued = (users[username].totalTicketsIssued || 0) + 1;
+        saveUsers(users);
+        addUserNotification(username, `🎫 PUSH: Issued ticket ${ticketNumber} for ${office.name}. Position ${office.queueCount}`);
+        showToast(`Ticket issued: ${ticketNumber}`);
+        renderAllForUser(username);
+    }
+
+    // POP: Cancel active ticket
+    function cancelActiveTicket() {
+        const username = getLoggedInUser();
+        if (!username) return;
+        const users = getUsers();
+        const user = users[username];
+        if (!user?.activeTicket) { showToast("No active ticket"); return; }
+        const ticket = user.activeTicket;
+        const office = campusState.offices.find(o => o.id === ticket.officeId);
+        if (office) { office.queueCount = Math.max(0, office.queueCount - 1); office.avgWaitMin = Math.max(2, office.avgWaitMin - 1); saveCampusState(); }
+        addToHistory(username, { type: "cancelled_ticket", ticketId: ticket.ticketId, office: ticket.officeName });
+        addUserNotification(username, `❌ POP: Cancelled ticket ${ticket.ticketId}`);
+        user.activeTicket = null;
+        saveUsers(users);
+        showToast("Ticket cancelled");
+        renderAllForUser(username);
+    }
+
+    // Staff: Serve next customer
+    function serveNextCustomer() {
+        const username = getLoggedInUser();
+        if (!username) return;
+        const users = getUsers();
+        if (users[username]?.role !== 'staff' && users[username]?.role !== 'admin') { showToast("Only staff can serve customers."); return; }
+        const officeId = document.getElementById('staffOfficeSelect').value;
+        const office = campusState.offices.find(o => o.id === officeId);
+        if (!office) return;
+        if (office.queueCount > 0) {
+            office.queueCount -= 1;
+            office.avgWaitMin = Math.max(2, office.avgWaitMin - 1);
+            saveCampusState();
+            addUserNotification(username, `✅ Served a customer at ${office.name}. Queue now ${office.queueCount}`);
+            showToast(`Served customer at ${office.name}`);
+            // Check if any user's active ticket matches and position becomes 0
+            for (const [user, data] of Object.entries(users)) {
+                if (data.activeTicket && data.activeTicket.officeId === officeId && office.queueCount === 0) {
+                    addToHistory(user, { type: "completed_ticket", ticketId: data.activeTicket.ticketId, office: office.name });
+                    addUserNotification(user, `✅ You have been served at ${office.name}. Ticket completed.`);
+                    data.activeTicket = null;
+                }
+            }
+            saveUsers(users);
+            renderAllForUser(username);
+        } else showToast("No customers in queue.");
+    }
+
+    // Space Check-in/out + waiting list
+    function checkIn(spaceId) {
+        const username = getLoggedInUser();
+        if (!username) { showToast("Please login first"); return; }
+        const space = campusState.spaces.find(s => s.id === spaceId);
+        if (!space) return;
+        if (space.occupied >= space.capacity) { showToast("Space is full. Join waiting list instead."); return; }
+        space.occupied += 1;
+        saveCampusState();
+        addToHistory(username, { type: "check_in", spaceName: space.name });
+        addUserNotification(username, `✅ Checked in to ${space.name}. Occupancy ${space.occupied}/${space.capacity}`);
+        showToast(`Checked in to ${space.name}`);
+        // Notify next in waiting list if space was full before? Not needed here.
+        renderAllForUser(username);
+    }
+    function checkOut(spaceId) {
+        const username = getLoggedInUser();
+        if (!username) return;
+        const space = campusState.spaces.find(s => s.id === spaceId);
+        if (!space) return;
+        if (space.occupied <= 0) { showToast("No one to check out."); return; }
+        space.occupied -= 1;
+        saveCampusState();
+        addToHistory(username, { type: "check_out", spaceName: space.name });
+        addUserNotification(username, `🚪 Checked out of ${space.name}. Occupancy ${space.occupied}/${space.capacity}`);
+        showToast(`Checked out of ${space.name}`);
+        // Notify first person on waiting list if space became available
+        if (space.waitingList && space.waitingList.length > 0 && space.occupied < space.capacity) {
+            const nextUser = space.waitingList.shift();
+            addUserNotification(nextUser, `🎉 A spot just opened at ${space.name}! Check in now.`);
+            showToast(`Notified ${nextUser} about available spot.`);
+            saveCampusState();
+        }
+        renderAllForUser(username);
+    }
+    function joinWaitingList(spaceId) {
+        const username = getLoggedInUser();
+        if (!username) { showToast("Please login first"); return; }
+        const space = campusState.spaces.find(s => s.id === spaceId);
+        if (!space) return;
+        if (space.occupied < space.capacity) { showToast("Space is not full. You can check in directly."); return; }
+        if (space.waitingList.includes(username)) { showToast("Already on waiting list."); return; }
+        space.waitingList.push(username);
+        saveCampusState();
+        addUserNotification(username, `📝 You joined waiting list for ${space.name}. You'll be notified when a spot opens.`);
+        showToast(`Joined waiting list for ${space.name}`);
+        renderAllForUser(username);
+    }
+
+    // Admin: add office, reset, update queue
+    function addOffice() {
+        const name = document.getElementById('newOfficeName').value.trim();
+        const prefix = document.getElementById('newOfficePrefix').value.trim();
+        if (!name || !prefix) { showToast("Enter name and prefix"); return; }
+        campusState.offices.push({ id: "office_"+Date.now(), name, queueCount: 0, avgWaitMin: 1, ticketPrefix: prefix, location: "Campus" });
+        saveCampusState();
+        renderAllForUser(getLoggedInUser());
+        showToast("Office added");
+    }
+    function resetSystem() {
+        if (confirm("Reset all data? This will clear everything.")) { localStorage.clear(); location.reload(); }
+    }
+
+    // Export history as CSV
+    function exportHistory() {
+        const username = getLoggedInUser();
+        const users = getUsers();
+        const history = users[username]?.history || [];
+        if (history.length === 0) { showToast("No history to export"); return; }
+        let csvRows = [["Type", "Details", "Timestamp"]];
+        history.forEach(entry => {
+            let detail = "";
+            if (entry.type === "completed_ticket") detail = `Ticket ${entry.ticketId} at ${entry.office}`;
+            else if (entry.type === "cancelled_ticket") detail = `Ticket ${entry.ticketId} cancelled`;
+            else if (entry.type === "check_in") detail = `Checked in to ${entry.spaceName}`;
+            else if (entry.type === "check_out") detail = `Checked out of ${entry.spaceName}`;
+            csvRows.push([entry.type, detail, entry.timestamp]);
+        });
+        const csvContent = csvRows.map(row => row.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `${username}_history.csv`; a.click();
+        URL.revokeObjectURL(url);
+        showToast("History exported");
+    }
+
+    // Render functions
+    function renderQueues() {
+        const container = document.getElementById('queueList');
+        if (!container) return;
+        let html = '';
+        campusState.offices.forEach(office => {
+            html += `<div class="queue-item"><span class="office-name">${office.name}</span><div class="queue-stats"><span class="badge-count">👥 ${office.queueCount} waiting</span><span class="badge-wait">⏱️ ~${Math.round(office.avgWaitMin)} min</span><span style="font-size:0.7rem;">📍 ${office.location}</span><button class="btn-primary" data-office-id="${office.id}">🎫 Get Ticket (push)</button></div></div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('[data-office-id]').forEach(btn => btn.addEventListener('click', (e) => issueTicket(btn.getAttribute('data-office-id'))));
+    }
+
+    function renderSpaces() {
+        const container = document.getElementById('spaceList');
+        if (!container) return;
+        let html = '';
+        campusState.spaces.forEach(space => {
+            const percent = (space.occupied / space.capacity) * 100;
+            let fillClass = 'fill-low'; if (percent>=70) fillClass='fill-high'; else if (percent>=40) fillClass='fill-mid';
+            const isFull = space.occupied >= space.capacity;
+            html += `<div class="space-item"><span class="space-name">${space.name}</span><div class="progress-bar"><div class="progress-fill ${fillClass}" style="width: ${percent}%;"></div></div><span class="occupancy-text">${space.occupied}/${space.capacity} (${Math.round(percent)}%)</span>
+                    <button class="checkin-btn" data-space-id="${space.id}">✅ Check-in</button>
+                    <button class="checkout-btn" data-space-id="${space.id}">🚪 Check-out</button>
+                    ${isFull ? `<button class="waitlist-btn" data-space-id="${space.id}">📋 Join Waiting List (${space.waitingList?.length || 0})</button>` : ''}
+                    </div><div style="font-size:0.7rem; margin-left:150px; margin-bottom:8px;">${space.description}</div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.checkin-btn').forEach(btn => btn.addEventListener('click', (e) => checkIn(btn.getAttribute('data-space-id'))));
+        document.querySelectorAll('.checkout-btn').forEach(btn => btn.addEventListener('click', (e) => checkOut(btn.getAttribute('data-space-id'))));
+        document.querySelectorAll('.waitlist-btn').forEach(btn => btn.addEventListener('click', (e) => joinWaitingList(btn.getAttribute('data-space-id'))));
+    }
+
+    function renderActivityAndQR(username) {
+        const container = document.getElementById('activityPanel');
+        const qrContainer = document.getElementById('qrCodeContainer');
+        const users = getUsers();
+        const user = users[username];
+        if (user?.activeTicket) {
+            const t = user.activeTicket;
+            container.innerHTML = `<div><strong>🎟️ ${t.ticketId}</strong> — ${t.officeName}<br>Position ${t.position} · Est. wait ${t.waitEstimate} min<br><button id="cancelTicketBtn" style="background:var(--danger);">❌ Cancel (pop)</button></div>`;
+            document.getElementById('cancelTicketBtn')?.addEventListener('click', cancelActiveTicket);
+            qrContainer.innerHTML = `<div id="qrcode"></div><p style="font-size:0.7rem;">Scan for validation</p>`;
+            new QRCode(document.getElementById("qrcode"), { text: `${t.ticketId}|${t.officeName}|${username}`, width: 100, height: 100 });
+        } else { container.innerHTML = `<div>⚡ No active ticket.</div>`; qrContainer.innerHTML = ''; }
+    }
+
+    function renderHistory(username) {
+        const container = document.getElementById('historyPanel');
+        const users = getUsers();
+        const user = users[username];
+        if (!user?.history || user.history.length===0) { container.innerHTML = '<div>No history yet.</div>'; return; }
+        let html = '';
+        user.history.slice(0,10).forEach(entry => {
+            if (entry.type === 'completed_ticket') html += `<div class="history-item">✅ Ticket ${entry.ticketId} completed at ${entry.office} · ${entry.timestamp}</div>`;
+            else if (entry.type === 'cancelled_ticket') html += `<div class="history-item">❌ Ticket ${entry.ticketId} cancelled · ${entry.timestamp}</div>`;
+            else if (entry.type === 'check_in') html += `<div class="history-item">✅ Checked in to ${entry.spaceName} · ${entry.timestamp}</div>`;
+            else if (entry.type === 'check_out') html += `<div class="history-item">🚪 Checked out of ${entry.spaceName} · ${entry.timestamp}</div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderNotifications(username) {
+        const container = document.getElementById('notificationsPanel');
+        const users = getUsers();
+        const user = users[username];
+        let notifs = user?.notifications || ["Welcome to SDG 9 aligned SmartCampus!"];
+        let html = '';
+        notifs.slice(0,8).forEach(n => html += `<div class="notif-item">🔔 ${n}</div>`);
+        container.innerHTML = html;
+    }
+
+    function renderKPIs() {
+        document.getElementById('activeQueuesCount').innerText = campusState.offices.length;
+        document.getElementById('availableSpacesCount').innerText = campusState.spaces.filter(s => s.occupied < s.capacity).length;
+        const avgWait = campusState.offices.reduce((s,o) => s + o.avgWaitMin,0)/campusState.offices.length;
+        document.getElementById('avgWaitValue').innerHTML = Math.round(avgWait) + '<span class="kpi-unit">min</span>';
+        document.getElementById('totalTicketsValue').innerText = campusState.totalCampusTickets;
+    }
+
+    let queueChart = null;
+    function renderAdminCharts() {
+        const ctx = document.getElementById('queueChart')?.getContext('2d');
+        if (!ctx) return;
+        const labels = campusState.offices.map(o => o.name.split(' ')[0]);
+        const data = campusState.offices.map(o => o.queueCount);
+        if (queueChart) queueChart.destroy();
+        queueChart = new Chart(ctx, {
+            type: 'bar', data: { labels, datasets: [{ label: 'Queue Length', data, backgroundColor: '#1B7B6E' }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
+
+    function renderStaffPanel(username) {
+        const panel = document.getElementById('staffPanel');
+        const users = getUsers();
+        const role = users[username]?.role;
+        if (role === 'staff' || role === 'admin') {
+            panel.style.display = 'block';
+            const select = document.getElementById('staffOfficeSelect');
+            let options = '';
+            campusState.offices.forEach(office => { options += `<option value="${office.id}">${office.name}</option>`; });
+            select.innerHTML = options;
+            document.getElementById('serveNextBtn').onclick = serveNextCustomer;
+        } else panel.style.display = 'none';
+    }
+
+    function renderAdminPanel(username) {
+        const panel = document.getElementById('adminPanel');
+        const users = getUsers();
+        const isAdmin = users[username]?.isAdmin === true;
+        if (isAdmin && username === 'admin') {
+            panel.style.display = 'block';
+            let controls = '<div><strong>Edit Queue Counts:</strong></div>';
+            campusState.offices.forEach(office => {
+                controls += `<div>${office.name}: <input type="number" id="edit_${office.id}" value="${office.queueCount}" style="width:60px;"> <button onclick="window.updateQueueCount('${office.id}')">Update</button></div>`;
+            });
+            document.getElementById('adminQueueControls').innerHTML = controls;
+            window.updateQueueCount = (officeId) => {
+                const newVal = parseInt(document.getElementById(`edit_${officeId}`).value);
+                const office = campusState.offices.find(o => o.id === officeId);
+                if (office && !isNaN(newVal)) { office.queueCount = newVal; saveCampusState(); renderAllForUser(username); showToast(`Updated ${office.name}`); }
+            };
+            renderAdminCharts();
+        } else panel.style.display = 'none';
+    }
+
+    function renderAllForUser(username) {
+        if (!username) return;
+        const users = getUsers();
+        const role = users[username]?.role || 'student';
+        document.getElementById('currentUsername').innerText = username;
+        document.getElementById('userRole').innerText = role;
+        renderQueues(); renderSpaces(); renderActivityAndQR(username); renderHistory(username); renderNotifications(username); renderKPIs(); renderStaffPanel(username); renderAdminPanel(username);
+    }
+
+    // Cross-tab sync
+    window.addEventListener('storage', (e) => {
+        if (e.key === CAMPUS_STORAGE && e.newValue) {
+            try { campusState = JSON.parse(e.newValue); } catch(e) {}
+            const logged = getLoggedInUser();
+            if (logged) renderAllForUser(logged);
+        }
+        if (e.key === USERS_STORAGE || e.key === SESSION_KEY) {
+            const logged = getLoggedInUser();
+            if (logged) renderAllForUser(logged);
+            else location.reload();
+        }
+    });
+
+    // Auth
+    function login() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const users = getUsers();
+        if (users[username] && users[username].password === password) {
+            setLoggedInUser(username);
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            renderAllForUser(username);
+            showToast(`Welcome ${username}`);
+        } else alert("Invalid credentials");
+    }
+    function register() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        if (!username || !password) { alert("Fill all fields"); return; }
+        const users = getUsers();
+        if (users[username]) { alert("Username exists"); return; }
+        users[username] = { password, role: "student", activeTicket: null, notifications: [`Joined SmartCampus – supporting SDG 9`], history: [], totalTicketsIssued: 0 };
+        saveUsers(users);
+        alert("Registered! Please login.");
+        showLoginForm();
+    }
+    function showLoginForm() { document.getElementById('authTitle').innerText = "Login"; document.getElementById('loginBtn').onclick = login; document.getElementById('showRegisterLink').onclick = showRegisterForm; }
+    function showRegisterForm() { document.getElementById('authTitle').innerText = "Register"; document.getElementById('loginBtn').onclick = register; document.getElementById('showRegisterLink').onclick = showLoginForm; }
+    function logout() { setLoggedInUser(null); document.getElementById('authContainer').style.display = 'block'; document.getElementById('mainApp').style.display = 'none'; showLoginForm(); showToast("Logged out"); }
+    function showToast(msg) { let t = document.querySelector('.toast'); if(t) t.remove(); const div = document.createElement('div'); div.className = 'toast'; div.innerText = msg; document.body.appendChild(div); setTimeout(()=>div.remove(),3000); }
+
+    // Init
+    function init() {
+        const loggedUser = getLoggedInUser();
+        if (loggedUser && getUsers()[loggedUser]) {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            renderAllForUser(loggedUser);
+        } else { document.getElementById('authContainer').style.display = 'block'; document.getElementById('mainApp').style.display = 'none'; showLoginForm(); }
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('addOfficeBtn').addEventListener('click', addOffice);
+        document.getElementById('resetSystemBtn').addEventListener('click', resetSystem);
+        document.getElementById('exportHistoryBtn').addEventListener('click', exportHistory);
+    }
+    init();
+</script>
+</body>
+</html>
